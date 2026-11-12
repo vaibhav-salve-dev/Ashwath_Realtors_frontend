@@ -1,0 +1,479 @@
+import React, { useEffect, useState } from "react";
+import { Plus, Edit, Trash2, MapPin, Bed, Bath, Square } from "lucide-react";
+import { useAdmin } from "../../context/AdminContext";
+
+const FlatManagement = () => {
+  // const { flats, addFlat, updateFlat, deleteFlat } = useAdmin();
+  const [flats,setFlats]=useState([]);
+  useEffect(()=>{
+    fetch("http://localhost:5100/api/flats")
+    .then(res=>res.json())
+    .then(data=>{
+      console.log("data : ",data);
+      setFlats(data);
+    })
+  },[]);
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingFlat, setEditingFlat] = useState<any | null>(null);
+  const [formData, setFormData] = useState<any>({
+    title: "",
+    category: "",
+    price: "",
+    location: "",
+    image: "",
+    bedrooms: "",
+    bathrooms: "",
+    area: "",
+    description: "",
+    features: "",
+    imageGallery: [],
+  });
+
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+
+  const handleShowAddForm = () => {
+    setEditingFlat(null);
+    setFormData({
+      title: "",
+      category: "",
+      price: "",
+      location: "",
+      image: "",
+      bedrooms: "",
+      bathrooms: "",
+      area: "",
+      description: "",
+      features: "",
+      imageGallery: [],
+    });
+    setGalleryFiles([]);
+    setGalleryPreviews([]);
+    setShowForm(true);
+  };
+
+  const handleShowEditForm = (flat: any) => {
+    setEditingFlat(flat);
+    setFormData({
+      ...flat,
+      category: flat.category || "",
+      features: Array.isArray(flat.features) ? flat.features.join(", ") : "",
+      imageGallery: Array.isArray(flat.imageGallery) ? flat.imageGallery : [],
+      bedrooms: flat.bedrooms || "",
+      bathrooms: flat.bathrooms || "",
+      price: flat.price || "",
+      area: flat.area || "",
+    });
+    setGalleryPreviews(flat.imageGallery || []);
+    setShowForm(true);
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setGalleryFiles(filesArray);
+
+      const previews = filesArray.map((file) => URL.createObjectURL(file));
+      setGalleryPreviews(previews);
+    }
+  };
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  // Create FormData object
+  const form = new FormData();
+
+  form.append("title", formData.title);
+  form.append("category", formData.category);
+  form.append("price", formData.price.toString());
+  form.append("location", formData.location);
+  form.append("area", formData.area.toString());
+  form.append("bathrooms", formData.bathrooms.toString());
+  form.append("bedrooms", formData.bedrooms.toString());
+  form.append("description", formData.description);
+  form.append("features", formData.features);
+
+  // Append main image file if exists
+  if (file) {
+    form.append("image", file);
+  }
+
+  // Append gallery images
+  galleryFiles.forEach((f) => {
+    form.append("imageGallery", f);
+  });
+
+  try {
+    if (editingFlat) {
+      // PUT request for updating
+      const res = await fetch(`http://localhost:5000/api/flats/${editingFlat.id}`, {
+        method: "PUT",
+        body: form,
+      });
+      const data = await res.json();
+      updateFlat(editingFlat.id, data);
+    } else {
+      // POST request for adding
+      const res = await fetch("http://localhost:5100/api/flats", {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+      addFlat(data);
+    }
+  } catch (error) {
+    console.error("Error submitting form:", error);
+  }
+
+  // Reset form
+  setShowForm(false);
+  setFile(null);
+  setPreview("");
+  setGalleryFiles([]);
+  setGalleryPreviews([]);
+};
+
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const getCategoryBadge = (category?: string) => {
+    const categoryStyles: Record<string, string> = {
+      available: "bg-green-100 text-green-800",
+      sold: "bg-red-100 text-red-800",
+      upcoming: "bg-blue-100 text-blue-800",
+    };
+    return categoryStyles[category || ""] || "bg-gray-100 text-gray-800";
+  };
+
+  const getCategoryLabel = (category?: string) => {
+    if (!category) return "Unknown";
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  return (
+    <div className="p-8">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Flat Management</h1>
+          <p className="text-gray-600">Manage your property listings and availability</p>
+        </div>
+        <button
+          onClick={handleShowAddForm}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Flat
+        </button>
+      </div>
+
+      {/* Flats Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {flats.map((flat) => (
+          <div
+            key={flat.id}
+            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+          >
+            <div className="relative">
+              <img src={`http://localhost:5100/uploads/${flat.image}`} alt={flat.title} className="w-full h-48 object-cover" />
+              <div className="absolute top-4 left-4">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryBadge(
+                    flat.category
+                  )}`}
+                >
+                  {getCategoryLabel(flat.category)}
+                </span>
+              </div>
+              <div className="absolute bottom-4 left-4">
+                <div className="bg-black/70 text-white px-3 py-1 rounded-lg font-bold">
+                  ₹{flat.price.toLocaleString("en-IN")}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{flat.title}</h3>
+
+              <div className="flex items-center text-gray-600 mb-4">
+                <MapPin className="h-4 w-4 mr-2 text-purple-600" />
+                <span className="text-sm">{flat.location}</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <Bed className="h-4 w-4 text-gray-500" />
+                  </div>
+                  <div className="text-sm font-medium">{flat.bedrooms} Bed</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <Bath className="h-4 w-4 text-gray-500" />
+                  </div>
+                  <div className="text-sm font-medium">{flat.bathrooms} Bath</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <Square className="h-4 w-4 text-gray-500" />
+                  </div>
+                  <div className="text-sm font-medium">{flat.area} sq ft</div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => handleShowEditForm(flat)}
+                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => deleteFlat(flat.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add/Edit Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900">
+                {editingFlat ? "Edit Flat" : "Add New Flat"}
+              </h3>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category *
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border rounded-lg"
+                  >
+                    <option value="">Select category</option>
+                    <option value="available">Available</option>
+                    <option value="sold">Sold</option>
+                    <option value="upcoming">Upcoming</option>
+                  </select>
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Bedrooms */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bedrooms *
+                  </label>
+                  <input
+                    type="number"
+                    name="bedrooms"
+                    value={formData.bedrooms}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Bathrooms */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bathrooms *
+                  </label>
+                  <input
+                    type="number"
+                    name="bathrooms"
+                    value={formData.bathrooms}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Area */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Area (sq ft) *
+                  </label>
+                  <input
+                    type="number"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Features */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Features
+                  </label>
+                  <input
+                    type="text"
+                    name="features"
+                    value={formData.features}
+                    onChange={handleChange}
+                    placeholder="Comma separated"
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                </div>
+
+                {/* Main Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Main Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files ? e.target.files[0] : null;
+                      setFile(f);
+                      setPreview(f ? URL.createObjectURL(f) : "");
+                    }}
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  {(preview || formData.image) && (
+                    <div className="mt-2">
+                      <img
+                        src={preview || formData.image}
+                        alt="preview"
+                        className="h-32 object-cover rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Image Gallery */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Image Gallery
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleGalleryChange}
+                    className="w-full px-4 py-3 border rounded-lg"
+                  />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {galleryPreviews.map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`preview-${i}`}
+                        className="h-20 w-20 object-cover rounded"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  className="w-full px-4 py-3 border rounded-lg"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end space-x-4 mt-8">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="px-6 py-3 border rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="px-6 py-3 bg-purple-600 text-white rounded-lg">
+                  {editingFlat ? "Update Flat" : "Add Flat"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default FlatManagement;
