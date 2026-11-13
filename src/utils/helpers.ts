@@ -1,4 +1,7 @@
-export const BACKEND_URL = 'http://localhost:5100';
+// Backend API base URL: defaults to localhost:5100 in dev, or uses VITE_BACKEND_URL in production
+export const BACKEND_URL = (
+  import.meta.env.VITE_BACKEND_URL || 'http://localhost:5100'
+).replace(/\/+$/, '');
 
 /**
  * Resolves an image path from backend or external URL
