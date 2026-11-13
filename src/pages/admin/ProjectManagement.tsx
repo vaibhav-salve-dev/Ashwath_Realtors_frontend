@@ -145,21 +145,21 @@ const ProjectManagement = () => {
   });
 
   return (
-    <div className="p-6 sm:p-10 space-y-8 bg-slate-100/60 min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8 bg-slate-100/60 min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold font-serif text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold font-serif text-slate-900 tracking-tight">
             Project Portfolio Management
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Add, update, or showcase residential and commercial civil developments.
           </p>
         </div>
 
         <button
           onClick={handleShowAddForm}
-          className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs hover:from-amber-400 hover:to-amber-500 shadow-md shadow-amber-500/20 flex items-center gap-2"
+          className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs hover:from-amber-400 hover:to-amber-500 shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 flex-shrink-0"
         >
           <Plus className="h-4 w-4" />
           <span>Add New Project</span>
@@ -182,7 +182,7 @@ const ProjectManagement = () => {
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-2.5 text-xs rounded-xl bg-white border border-slate-200 text-slate-700 focus:outline-none focus:border-amber-500 shadow-sm font-semibold capitalize"
+          className="w-full sm:w-auto px-4 py-2.5 text-xs rounded-xl bg-white border border-slate-200 text-slate-700 focus:outline-none focus:border-amber-500 shadow-sm font-semibold capitalize"
         >
           <option value="all">All Categories</option>
           <option value="residential">Residential</option>
@@ -192,14 +192,14 @@ const ProjectManagement = () => {
       </div>
 
       {/* Projects Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredProjects.map((project) => (
           <div
             key={project._id}
             className="glass-card rounded-2xl overflow-hidden border border-white/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
           >
             <div>
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-44 sm:h-48 overflow-hidden">
                 <img
                   src={project.image}
                   alt={project.title}
@@ -217,8 +217,8 @@ const ProjectManagement = () => {
                 </div>
               </div>
 
-              <div className="p-5">
-                <h3 className="font-bold font-serif text-slate-900 text-lg mb-1 truncate">
+              <div className="p-4 sm:p-5">
+                <h3 className="font-bold font-serif text-slate-900 text-base sm:text-lg mb-1 truncate">
                   {project.title}
                 </h3>
                 <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">
@@ -238,7 +238,7 @@ const ProjectManagement = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50/70 border-t border-slate-100 flex justify-end gap-2">
+            <div className="p-3.5 sm:p-4 bg-slate-50/70 border-t border-slate-100 flex justify-end gap-2">
               <button
                 onClick={() => handleShowEditForm(project)}
                 className="p-2 text-slate-700 hover:text-amber-700 hover:bg-amber-500/10 rounded-lg transition-colors"
@@ -266,10 +266,10 @@ const ProjectManagement = () => {
 
       {/* Add / Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="glass-panel-dark rounded-3xl max-w-2xl w-full border border-white/20 shadow-2xl p-6 sm:p-8 animate-in zoom-in-95 duration-300 text-white relative max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-              <h3 className="text-xl font-bold font-serif">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="glass-panel-dark rounded-2xl sm:rounded-3xl max-w-2xl w-full border border-white/20 shadow-2xl p-5 sm:p-8 animate-in zoom-in-95 duration-300 text-white relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-bold font-serif">
                 {editingProject ? 'Edit Construction Project' : 'Add New Project'}
               </h3>
               <button
@@ -294,7 +294,7 @@ const ProjectManagement = () => {
                 />
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block font-bold text-slate-300 uppercase mb-1">Category *</label>
                   <select
@@ -324,7 +324,7 @@ const ProjectManagement = () => {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block font-bold text-slate-300 uppercase mb-1">Year of Handover / Construction *</label>
                   <input
@@ -364,7 +364,7 @@ const ProjectManagement = () => {
                   className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/15 text-slate-300"
                 />
                 {preview && (
-                  <div className="mt-2 relative h-32 rounded-xl overflow-hidden border border-white/20">
+                  <div className="mt-2 relative h-32 sm:h-36 rounded-xl overflow-hidden border border-white/20">
                     <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 )}
@@ -375,7 +375,7 @@ const ProjectManagement = () => {
                 <textarea
                   name="description"
                   required
-                  rows={4}
+                  rows={3}
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Detail the built-up area, amenities, structural specifications..."
@@ -383,18 +383,18 @@ const ProjectManagement = () => {
                 ></textarea>
               </div>
 
-              <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+              <div className="pt-4 border-t border-white/10 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-5 py-2.5 rounded-xl border border-white/20 text-slate-300 hover:bg-white/10 transition-colors"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-white/20 text-slate-300 hover:bg-white/10 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 hover:from-amber-400 hover:to-amber-500 transition-all shadow-md shadow-amber-500/20 disabled:opacity-50"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 hover:from-amber-400 hover:to-amber-500 transition-all shadow-md shadow-amber-500/20 disabled:opacity-50"
                 >
                   {saving ? 'Saving...' : editingProject ? 'Save Changes' : 'Publish Project'}
                 </button>
